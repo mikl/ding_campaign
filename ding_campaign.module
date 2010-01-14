@@ -1,0 +1,497 @@
+<?php
+// $Id$
+
+/**
+ * @file ding_campaign.module
+ * Provides the campaign node type for the Ding! project.
+ */
+
+// Default number of campaigns to display.
+define('DING_CAMPAIGN_DEFAULT_COUNT', 3);
+
+/**
+ * Implementation of hook_menu().
+ */
+function ding_campaign_menu() {
+  $items = array();
+
+  $items['node/%node/campaign_rules'] = array(
+    'title' => 'Display rules',
+    'page callback' => 'ding_campaign_admin_rule_page',
+    'page arguments' => array(1),
+    'access callback' => 'ding_campaign_access',
+    'access arguments' => array('update', 1),
+    'file' => 'ding_campaign.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'options' => array('admin' => TRUE),
+    'weight' => 2,
+  );
+
+  $items['node/%node/campaign_rules/ahah'] = array(
+    'title' => 'Display rules',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ding_campaign_admin_rule_form_ahah', 1),
+    'access callback' => 'ding_campaign_access',
+    'access arguments' => array('update', 1),
+    'file' => 'ding_campaign.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['campaign_rules/autocomplete/%/%'] = array(
+    'title' => 'Campaign rules autocomplete callback',
+    'page callback' => 'ding_campaign_admin_autocomplete',
+    'page arguments' => array(2, 3),
+    'access arguments' => array('edit campaign'),
+    'file' => 'ding_campaign.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ *
+ * Since we are limiting the ability to create new nodes to certain users,
+ * we need to define what those permissions are here. We also define a permission
+ * to allow users to edit the nodes they created.
+ */
+function ding_campaign_perm() {
+  return array(
+    'create campaign',
+    'edit campaign',
+    'delete campaign',
+  );
+}
+
+/**
+ * Implementation of hook_node_info().
+ */
+function ding_campaign_node_info() {
+  return array(
+    'campaign' => array(
+      'name' => t('Campaign'),
+      'module' => 'ding_campaign',
+      'description' => 'An campaign, usually related to a library.',
+      'title_label' => t('Name'),
+      'body_label' => t('Campaign text'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_access().
+ */
+function ding_campaign_access($op, $node, $account = NULL) {
+  switch ($op) {
+    case 'create':
+      return user_access('create campaign', $account);
+    case 'update':
+      return user_access('edit campaign', $account);
+    case 'delete':
+      return user_access('delete campaign', $account);
+  }
+}
+
+/**
+ * Implementation of hook_form().
+ *
+ * Provides the node editing form.
+ */
+function ding_campaign_form(&$node) {
+  // We have a bit of JavaScript to help with the interface for this 
+  // module's editing interface.
+  drupal_add_js(drupal_get_path('module', 'ding_campaign') . '/js/ding_campaign.edit.js');
+
+  // The site admin can decide if this node type has a title and body, and how
+  // the fields should be labeled. We need to load these settings so we can
+  // build the node form correctly.
+  $type = node_get_types('type', $node);
+  $form = array();
+
+  if ($type->has_title) {
+    $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => check_plain($type->title_label),
+      '#required' => TRUE,
+      '#default_value' => $node->title,
+      '#weight' => -5
+    );
+  }
+
+  if ($type->has_body) {
+    // In Drupal 6, we can use node_body_field() to get the body and filter
+    // elements. This replaces the old textarea + filter_form() method of
+    // setting this up. It will also ensure the teaser splitter gets set up
+    // properly.
+    $form['body_field'] = node_body_field($node, $type->body_label, $type->min_word_count);
+  }
+  // For this node type, we don't want splittable teasers, so let's 
+  // disable that.
+  unset($form['body_field']['teaser_js']);
+  unset($form['body_field']['teaser_include']);
+
+  $form['campaign_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Campaign settings'),
+    '#weight' => -3,
+  );
+
+  $form['campaign_settings']['campaign_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Campaign type'),
+    '#options' => array(
+      'text-only' => t('Text only'),
+      'image-only' => t('Image only'),
+    ),
+    '#attributes' => array('class' => 'campaign-type-select'),
+    '#default_value' => (isset($node->campaign_type)) ? $node->campaign_type : 'text-only',
+  );
+
+  $form['campaign_settings']['campaign_theme'] = array(
+    '#type' => 'radios',
+    '#title' => t('Campaign theme'),
+    '#options' => array(
+      'red' => t('Red'),
+      'blue' => t('Blue'),
+      'green' => t('Green'),
+    ),
+    '#default_value' => (isset($node->campaign_theme)) ? $node->campaign_theme : 'red',
+  );
+
+  $form['campaign_settings']['campaign_weight'] = array(
+    '#type' => 'weight',
+    '#title' => t('Weight'),
+    '#default_value' => (isset($node->campaign_weight)) ? $node->campaign_weight : 0,
+  );
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_insert().
+ *
+ * As a new node is being inserted into the database, we need to do our own
+ * database inserts.
+ */
+function ding_campaign_insert($node) {
+  drupal_write_record('ding_campaign', $node);
+}
+
+/**
+ * Implementation of hook_update().
+ *
+ * As an existing node is being updated in the database, we need to do our own
+ * database updates.
+ */
+function ding_campaign_update($node) {
+  // Check if theres an existing row in {ding_campaign}
+  $prev_vid = db_result(db_query("SELECT vid FROM {ding_campaign} WHERE nid=%d", $node->nid));
+  // If this is a new node or we're adding a new revision,
+  if ($node->revision || !$prev_vid) {
+    ding_campaign_insert($node);
+  }
+  else {
+    drupal_write_record('ding_campaign', $node, array('nid', 'vid'));
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ *
+ * When a node revision is deleted, we need to remove the corresponding record
+ * from our table. The only way to handle revision deletion is by implementing
+ * hook_nodeapi().
+ */
+function ding_campaign_nodeapi(&$node, $op, $teaser, $page) {
+  switch ($op) {
+    case 'delete revision':
+      // Notice that we're matching a single revision based on the node's vid.
+      db_query('DELETE FROM {ding_campaign} WHERE vid = %d', $node->vid);
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_delete().
+ *
+ * When a node is deleted, we need to remove all related records from our table.
+ */
+function ding_campaign_delete($node) {
+  // Notice that we're matching all revision, by using the node's nid.
+  db_query('DELETE FROM {ding_campaign} WHERE nid = %d', $node->nid);
+  db_query('DELETE FROM {ding_campaign_rule} WHERE nid = %d', $node->nid);
+}
+
+/**
+ * Implementation of hook_load().
+ *
+ * Now that we've defined how to manage the node data in the database, we
+ * need to tell Drupal how to get the node back out. This hook is called
+ * every time a node is loaded, and allows us to do some loading of our own.
+ */
+function ding_campaign_load($node) {
+  $additions = db_fetch_object(db_query('SELECT * FROM {ding_campaign} WHERE vid = %d', $node->vid));
+  unset($additions->vid);
+  unset($additions->nid);
+
+  // Also fetch associated rules.
+  $additions->campaign_rules = array();
+  $rules_query = db_query("SELECT * FROM {ding_campaign_rule} WHERE nid = %d;", $node->nid);
+  while ($rule = db_fetch_array($rules_query)) {
+    $additions->campaign_rules[$rule['delta']] = $rule;
+  }
+
+  return $additions;
+}
+
+/**
+ * Implementation of hook_view().
+ *
+ * This is a typical implementation that simply runs the node text through
+ * the output filters.
+ */
+function ding_campaign_view($node, $teaser = FALSE, $page = FALSE) {
+  $node = node_prepare($node, $teaser);
+  return $node;
+}
+
+/**
+ * Implementation of hook_elements().
+ */
+function ding_campaign_elements() {
+  $types = array();
+  $types['ding_campaign_rule'] = array(
+    '#input' => TRUE,
+    '#process' => array('ding_campaign_rule_element_process'),
+    '#element_validate' => array('ding_campaign_rule_element_validate'),
+    '#default_value' => array(
+      'nid' => NULL,
+      'delta' => 0,
+      'type' => 'taxonomy',
+      'value' => '',
+    ),
+  );
+  return $types;
+}
+
+/**
+ * Implementation of hook_theme().
+ * 
+ * This lets us tell Drupal about our theme functions and their arguments.
+ */
+function ding_campaign_theme() {
+  return array(
+    'ding_campaign_rule' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'ding_campaign_relevant_campaigns' => array(
+      'context' => array('context' => NULL, 'max_count' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_dierctory().
+ */
+function ding_campaign_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Implementation of hook_admin_theme().
+ */
+function ding_campaign_admin_theme($op = 'info', $option = NULL) {
+  switch ($op) {
+    case 'info':
+      $options = array();
+      $options['ding_campaign_rules'] = array(
+        'title' => t('Campaign rules'),
+        'description' => t('Use the administration theme when campaign display rules.'),
+        'default' => TRUE,
+      );
+      return $options;
+      break;
+    case 'check':
+      switch ($option) {
+        case 'ding_campaign_rules':
+          return (arg(0) == 'node' && arg(2) == 'campaign_rules');
+      }
+      break;
+  }
+}
+
+/**
+ * Process callback to expand our form element into several fields.
+ */
+function ding_campaign_rule_element_process($element, $form_state) {
+  $element['#tree'] = TRUE;
+
+  if (!isset($element['#value'])) {
+    $element['#value'] = $element['#default_value'];
+  }
+  else {
+    $element['#value'] += $element['#default_value'];
+  }
+
+  $element['nid'] = array(
+    '#type' => 'value',
+    '#value' => $element['#nid'],
+  );
+
+  $element['delta'] = array(
+    '#type' => 'value',
+    '#value' => (isset($element['#delta'])) ? $element['#delta'] : $element['#value']['delta'],
+  );
+
+  $element['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Type'),
+    '#options' => array(
+      'page' => t('Specific page'),
+      'search_term' => t('Search term'),
+      'library' => t('Library'),
+      'taxonomy' => t('Taxonomy term'),
+      'generic' => t('Generic'),
+    ),
+    '#default_value' => $element['#value']['type'],
+  );
+
+  $element['value'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Value'),
+    '#default_value' => $element['#value']['value'],
+    // Set up autocomplete pointing to a dummy path that just returns an
+    // empty array. We set the correct path via JavaScript.
+    '#autocomplete_path' => 'campaign_rules/autocomplete/dummy/empty',
+  );
+
+  return $element;
+}
+
+/**
+ * Our element's validation function.
+ */
+function ding_campaign_rule_element_validate($element, &$form_state) {
+  return $form;
+}
+
+/**
+ * Get relevant campaigns.
+ *
+ * @param array $context
+ *    Array of context items – search_term, library, page and taxonomy.
+ * @param integer $max_count
+ *    The maximum number of campaigns to return.
+ * @return array
+ *    Array of node ids of relevant campaigns, sorted by relevancy.
+ */
+function ding_campaign_get_relevant($context, $max_count = DING_CAMPAIGN_DEFAULT_COUNT) {
+  $campaigns = array();
+  if (isset($context['page']) && !empty($context['page'])) {
+    if ($context['page'] instanceof stdClass) {
+      $nid = $context['page']->nid;
+    }
+    else {
+      $nid = (int) $context['page'];
+    }
+    $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $nid);
+    while ($camp_nid = db_result($query)) {
+      $campaigns[$camp_nid] += 9;
+    }
+  }
+  if (isset($context['search_term']) && !empty($context['search_term'])) {
+    // If there's more than one search term, make a SQL IN condition by
+    // splitting them and joining them with commas.
+    $keys = trim(drupal_strtolower(check_plain($context['search_term'])));
+    if (strpos($keys, ' ')) {
+      $keys = implode("','", array_merge(array($keys), explode(' ', $keys)));
+      $condition = "IN ('" . $keys . "')";
+    }
+    else {
+      $condition = "= '" . $keys . "'";
+    }
+
+    $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'search_term' AND value " . $condition);
+    while ($camp_nid = db_result($query)) {
+      $campaigns[$camp_nid] += 7;
+    }
+  }
+  if (isset($context['library']) && !empty($context['library'])) {
+    if ($context['library'] instanceof stdClass) {
+      $nid = $context['library']->nid;
+    }
+    else {
+      $nid = (int) $context['library'];
+    }
+    $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'library' AND value_id = %d;", $nid);
+    while ($camp_nid = db_result($query)) {
+      $campaigns[$camp_nid] += 5;
+    }
+  }
+  if (isset($context['taxonomy']) && !empty($context['taxonomy'])) {
+    if ($context['taxonomy'] instanceof stdClass) {
+      $tid = $context['taxonomy']->tid;
+    }
+    else {
+      $tid = (int) $context['taxonomy'];
+    }
+    $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'taxonomy' AND value_id = %d;", $tid);
+    while ($camp_nid = db_result($query)) {
+      $campaigns[$camp_nid] += 3;
+    }
+  }
+
+  // Give a small (and random) amount of relevancy to generic campaigns
+  // that have not scored in any of the other categories.
+  $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'generic'");
+  while ($camp_nid = db_result($query)) {
+    if (!isset($campaigns[$camp_nid]) || $campaigns[$camp_nid] == 0) {
+      $campaigns[$camp_nid] += (mt_rand(1, 10) / 10);
+    }
+  }
+
+  arsort($campaigns);
+  return array_slice(array_keys($campaigns), 0, $max_count);
+}
+
+/**
+ * Theme function to format the our custom form element.
+ *
+ * We use the container-inline class so that all three of the HTML elements 
+ * are placed next to each other, rather than on separate lines.
+ */
+function theme_ding_campaign_rule($element) {
+  return theme('form_element', $element, '<div class="campaign-rule-wrap container-inline">'. $element['#children'] .'</div>');
+}
+
+/**
+ * Theme function to get and render relevant campaigns based on context.
+ *
+ * @param array $context
+ *    The context array passed to ding_campaign_get_relevant()
+ * @return string
+ *    Rendered campaign nodes, or NULL if no match was found.
+ * @see ding_campaign_get_relevant().
+ */
+function theme_ding_campaign_relevant_campaigns($context, $max_count = DING_CAMPAIGN_DEFAULT_COUNT) {
+  $campaigns = ding_campaign_get_relevant($context, $max_count);
+  $output = '';
+
+  foreach ($campaigns as $nid) {
+    if ($nid > 0) {
+      $node = node_load($nid);
+      if ($node && $node->status) {
+        $output .= node_view($node, TRUE, FALSE, FALSE);
+      }
+    }
+  }
+
+  if (!empty($output)) {
+    return $output;
+  }
+  return FALSE;
+}
+

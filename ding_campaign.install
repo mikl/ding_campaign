@@ -1,0 +1,110 @@
+<?php 
+// $Id$
+
+/**
+ * @file ding_campaign.install
+ * Installation and upgrade hooks for the ding_campaign module.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function ding_campaign_install() {
+  drupal_install_schema('ding_campaign');
+  variable_set('admin_theme_ding_campaign_ding_campaign_rules', 1);
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function ding_campaign_uninstall() {
+  drupal_uninstall_schema('ding_campaign');
+  variable_del('admin_theme_ding_campaign_ding_campaign_rules');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function ding_campaign_schema() {  
+  $schema['ding_campaign'] = array(
+    'fields' => array(
+      'vid' => array(
+        'type' => 'int', 
+        'unsigned' => TRUE, 
+        'not null' => TRUE, 
+        'description' => '{node}.vid for node',
+      ),
+      'nid' => array(
+        'type' => 'int', 
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => '{node}.nid for node',
+      ),
+      'campaign_type' => array(
+        'type' => 'varchar',
+        'length' => 50,
+        'default' => 'normal',
+        'description' => 'The campaign type, image-only, text-only, etc.',
+      ),
+      'campaign_theme' => array(
+        'type' => 'varchar',
+        'length' => 50,
+        'default' => 'normal',
+        'description' => 'The campaign colour scheme.',
+      ),
+      'campaign_weight' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('vid', 'nid'),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'campaign_weight' => array('campaign_weight'),
+    ),
+  );
+
+  $schema['ding_campaign_rule'] = array(
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int', 
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => '{node}.nid for node',
+      ),
+      'delta' => array(
+        'type' => 'int', 
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Rule number - unique per node.',
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 50,
+        'description' => 'Rule type - one of library, page, taxonomy and search_term',
+      ),
+      'value' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'Rule value, text-version. Canonical for search term only',
+      ),
+      'value_id' => array(
+        'type' => 'int',
+        'unsigned' => true,
+        'not null' => FALSE,
+        'description' => 'Rule value ID. For the applicable types it serves as a foreign key to nodes, terms, etc.',
+      ),
+    ),
+    'primary key' => array('nid', 'delta'),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'type' => array('type'),
+      'value' => array('value'),
+      'value_id' => array('value_id'),
+    ), 
+  );
+  return $schema;
+}
+

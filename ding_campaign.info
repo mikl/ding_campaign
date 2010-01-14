@@ -1,0 +1,6 @@
+; $Id$
+name = Ding! campaign
+description = Campaign system. Displays context-sensitive, ad-like campaigns.
+package = Ding!
+core = 6.x
+

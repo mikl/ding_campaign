@@ -1,0 +1,183 @@
+# $Id$
+#
+# Danish translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  ding_campaign.admin.inc: n/a
+#  ding_campaign.module: n/a
+#  plugins/content_types/relevant.inc: n/a
+#  ding_campaign.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2009-07-28 14:54+0200\n"
+"PO-Revision-Date: 2009-07-28 14:54+0200\n"
+"Last-Translator: Mikkel Høgh <mikkel@hoegh.org>\n"
+"Language-Team: Danish <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: ding_campaign.admin.inc:35
+msgid "Rules"
+msgstr "Regler"
+
+#: ding_campaign.admin.inc:36
+msgid "The more rules that match on a page, the higher rank the campaign will have. The \"generic\" rule will give a small bit of rank on all pages, so that the campaign will show up if there is not enough relevant campaigns."
+msgstr "Jo flere regler der passer på en given side, jo højere relevans vil kampagnen have. Den \"generelle\" regel vil give kampagnen en lille smule relevans på alle sider, så den dukker op som fyld, hvis der ikke er tilstrækkelig med relevante kampagner."
+
+#: ding_campaign.admin.inc:70
+msgid "Save changes"
+msgstr "Gem ændringer"
+
+#: ding_campaign.admin.inc:98
+msgid "%value is not a valid value for the selected type (%type)."
+msgstr "%value er ikke en gyldig værdig for den valgte type (%type)."
+
+#: ding_campaign.module:74 plugins/content_types/relevant.inc:26;54
+msgid "Relevant campaigns"
+msgstr "Relevante kampagner"
+
+#: ding_campaign.module:86
+msgid "Maximum number of campaigns to display"
+msgstr "Maksimalt antal af kampagner der skal vises."
+
+#: ding_campaign.module:111 plugins/content_types/relevant.inc:16
+msgid "Campaign"
+msgstr "Kampagne"
+
+#: ding_campaign.module:114
+msgid "Name"
+msgstr "Navn"
+
+#: ding_campaign.module:115
+msgid "Campaign text"
+msgstr "Kampagnetekst"
+
+#: ding_campaign.module:183
+msgid "Campaign settings"
+msgstr "Kampagneindstillinger"
+
+#: ding_campaign.module:189
+msgid "Campaign type"
+msgstr "Kampagnetype"
+
+#: ding_campaign.module:191
+msgid "Text only"
+msgstr "Kun tekst"
+
+#: ding_campaign.module:192
+msgid "Image only"
+msgstr "Kun billeder"
+
+#: ding_campaign.module:200
+msgid "Campaign theme"
+msgstr "Kampagnetema"
+
+#: ding_campaign.module:202
+msgid "Red"
+msgstr ""
+
+#: ding_campaign.module:203
+msgid "Blue"
+msgstr "Blå"
+
+#: ding_campaign.module:204
+msgid "Green"
+msgstr ""
+
+#: ding_campaign.module:211
+msgid "Weight"
+msgstr "Vægt"
+
+#: ding_campaign.module:357
+msgid "Campaign rules"
+msgstr "Kampagneregler"
+
+#: ding_campaign.module:358
+msgid "Use the administration theme when campaign display rules."
+msgstr "Brug administrationstemaet når kampagneregler vises."
+
+#: ding_campaign.module:397
+msgid "Type"
+msgstr "Type"
+
+#: ding_campaign.module:399
+msgid "Specific page"
+msgstr "Specifik side"
+
+#: ding_campaign.module:400
+msgid "Search term"
+msgstr "Søgeterm"
+
+#: ding_campaign.module:401
+msgid "Library"
+msgstr "Bibliotek"
+
+#: ding_campaign.module:402
+msgid "Taxonomy term"
+msgstr "Ord i ordforråd"
+
+#: ding_campaign.module:403
+msgid "Generic"
+msgstr "Generel"
+
+#: ding_campaign.module:410
+msgid "Value"
+msgstr "Værdi"
+
+#: ding_campaign.module:61
+msgid "create campaign"
+msgstr "opret kampagne"
+
+#: ding_campaign.module:62
+msgid "view campaign"
+msgstr "se kampagne"
+
+#: ding_campaign.module:63
+msgid "edit campaign"
+msgstr "redigere kampagne"
+
+#: ding_campaign.module:64
+msgid "delete campaign"
+msgstr "slette kampagne"
+
+#: ding_campaign.module:19;31
+msgid "Display rules"
+msgstr "Visningsregler"
+
+#: ding_campaign.module:41
+msgid "Campaign rules autocomplete callback"
+msgstr "Campaign rules autocomplete callback"
+
+#: ding_campaign.module:0
+msgid "ding_campaign"
+msgstr "ding_campaign"
+
+#: ding_campaign.info:0
+msgid "Ding! campaign"
+msgstr "Ding! kampagner"
+
+#: ding_campaign.info:0
+msgid "Campaign system. Displays context-sensitive, ad-like campaigns."
+msgstr "Kampagnesystem. Viser kontekst-sensitive, reklame-agtige kampagner."
+
+#: ding_campaign.info:0
+msgid "Ding!"
+msgstr "Ding!"
+
+#: plugins/content_types/relevant.inc:27
+msgid "Miscellaneous"
+msgstr "Diverse"
+
+#: plugins/content_types/relevant.inc:29
+msgid "Page node"
+msgstr "Indholdsside"
+
+#: plugins/content_types/relevant.inc:30
+msgid "Related library"
+msgstr "Relateret bibliotek"
+
