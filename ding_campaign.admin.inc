@@ -2,6 +2,29 @@
 // $Id$
 
 /**
+ * Settings form.
+ *
+ * Enables the user to choose which node types the quick campaign
+ * selector should be added to.
+ */
+function ding_campaign_admin_settings_form(&$form_state) {
+  $form = array();
+
+  $form['ding_campaign_selector_node_types'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Campaign selection node types'),
+    '#description' => t('Select the node types that should have a campaign selector present on their editing form. This selector will enable the user to associate campaigns to his content without needing to edit the campaign.'),
+    '#options' => node_get_types('names'),
+    '#default_value' => variable_get('ding_campaign_selector_node_types', array()),
+  );
+
+  // Don't allow campaigns to be assigned to other campaigns.
+  unset($form['ding_campaign_selector_node_types']['#options']['campaign']);
+
+  return system_settings_form($form);
+}
+
+/**
  * Rules editing page callback.
  *
  * Simple wrapper for the form, only required to add the JavaScript.

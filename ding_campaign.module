@@ -46,6 +46,14 @@ function ding_campaign_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['admin/settings/ding_campaign'] = array(
+    'title' => 'Ding! Campaign',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ding_campaign_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'ding_campaign.admin.inc',
+  );
+
   return $items;
 }
 
