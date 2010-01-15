@@ -69,6 +69,7 @@ function ding_campaign_perm() {
     'create campaign',
     'edit campaign',
     'delete campaign',
+    'associate other content to campaign',
   );
 }
 
@@ -80,7 +81,7 @@ function ding_campaign_node_info() {
     'campaign' => array(
       'name' => t('Campaign'),
       'module' => 'ding_campaign',
-      'description' => 'An campaign, usually related to a library.',
+      'description' => 'A campaign, a small image or text snippet displayed on the page like an ad.',
       'title_label' => t('Name'),
       'body_label' => t('Campaign text'),
     ),
@@ -213,6 +214,43 @@ function ding_campaign_update($node) {
  */
 function ding_campaign_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
+    case 'load':
+      // Get the current campaign association for the node.
+      if (in_array($node->type, variable_get('ding_campaign_selector_node_types', array()))) {
+        $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $node->nid);
+
+        $node->ding_campaigns = array();
+        while ($campaign_nid = db_result($query)) {
+          $node->ding_campaigns[$campaign_nid] = $campaign_nid;
+        }
+      }
+      break;
+    case 'update':
+      // When updating a node, purge the current campaign selections first.
+      if (in_array($node->type, variable_get('ding_campaign_selector_node_types', array())) && user_access('associate other content to campaign')) {
+        db_query("DELETE FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $node->nid);
+      }
+    case 'insert':
+      $campaigns = array_filter($node->ding_campaigns);
+
+      if (!empty($campaigns) && in_array($node->type, variable_get('ding_campaign_selector_node_types', array())) && user_access('associate other content to campaign')) {
+        $cols = array();
+        $params = array();
+        $now = $_SERVER['REQUEST_TIME'];
+
+        foreach ($campaigns as $campaign_nid) {
+          // We use $now as delta to be reasonably sure not to have
+          // delta collisions within the same nid, since nid+delta is
+          // the primary key for ding_campaign_rule.
+          $cols[] = "(%d, $now, 'page', '%s', %d)";
+          $params[] = $campaign_nid;
+          $params[] = $node->title . ' [nid:' . $node->nid . ']';
+          $params[] = $node->nid;
+        }
+
+        db_query('INSERT INTO {ding_campaign_rule} (nid, delta, type, value, value_id) VALUES ' . implode(',', $cols), $params);
+      }
+      break;
     case 'delete revision':
       // Notice that we're matching a single revision based on the node's vid.
       db_query('DELETE FROM {ding_campaign} WHERE vid = %d', $node->vid);
@@ -300,6 +338,31 @@ function ding_campaign_theme() {
 }
 
 /**
+ * Implementation of hook_form_alter().
+ */
+function ding_campaign_form_alter(&$form, $form_state, $form_id) {
+  // For node types that have the campaign selector enabled.
+  if ($form['#id'] == 'node-form' && in_array($form['#node']->type, variable_get('ding_campaign_selector_node_types', array())) && user_access('associate other content to campaign')) {
+    $form['ding_campaign_select'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Campaigns'),
+      '#description' => t('Select the campaigns that should be displayed when this node is displayed as a page.'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+
+    $form['ding_campaign_select']['ding_campaigns'] = array(
+      '#type' => 'checkboxes',
+      '#options' => ding_campaign_load_option_list(),
+      '#attributes' => array('class' => 'ding-campaign-select'),
+      '#default_value' => (isset($form['#node']->ding_campaigns)) ? $form['#node']->ding_campaigns : array(),
+    );
+
+    drupal_add_css(drupal_get_path('module', 'ding_campaign') . '/css/ding_campaign.select.css');
+  }
+}
+
+/**
  * Implementation of hook_ctools_plugin_dierctory().
  */
 function ding_campaign_ctools_plugin_directory($module, $plugin) {
@@ -360,12 +423,16 @@ function ding_campaign_rule_element_process($element, $form_state) {
     '#options' => array(
       'page' => t('Specific page'),
       'search_term' => t('Search term'),
-      'library' => t('Library'),
       'taxonomy' => t('Taxonomy term'),
       'generic' => t('Generic'),
     ),
     '#default_value' => $element['#value']['type'],
   );
+
+  // If the Ding Library module is present, add an extra option.
+  if (function_exists('ding_library_menu')) {
+    $element['type']['#options']['library'] = t('Library');
+  }
 
   $element['value'] = array(
     '#type' => 'textfield',
@@ -501,5 +568,19 @@ function theme_ding_campaign_relevant_campaigns($context, $max_count = DING_CAMP
     return $output;
   }
   return FALSE;
+}
+
+/**
+ * Load list of available campaigns as an option list.
+ */
+function ding_campaign_load_option_list() {
+  $options = array();
+  $query = db_query("SELECT nid, title FROM node WHERE type = 'campaign' AND status <> 0 ORDER BY title;");
+
+  while ($row = db_fetch_array($query)) {
+    $options[$row['nid']] = $row['title'];
+  }
+
+  return $options;
 }
 
