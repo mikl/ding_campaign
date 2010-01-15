@@ -37,10 +37,10 @@ function ding_campaign_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items['campaign_rules/autocomplete/%/%'] = array(
+  $items['ding_campaign/autocomplete/%'] = array(
     'title' => 'Campaign rules autocomplete callback',
     'page callback' => 'ding_campaign_admin_autocomplete',
-    'page arguments' => array(2, 3),
+    'page arguments' => array(2),
     'access arguments' => array('edit campaign'),
     'file' => 'ding_campaign.admin.inc',
     'type' => MENU_CALLBACK,
@@ -440,7 +440,7 @@ function ding_campaign_rule_element_process($element, $form_state) {
     '#default_value' => $element['#value']['value'],
     // Set up autocomplete pointing to a dummy path that just returns an
     // empty array. We set the correct path via JavaScript.
-    '#autocomplete_path' => 'campaign_rules/autocomplete/dummy/empty',
+    '#autocomplete_path' => 'ding_campaign/autocomplete/dummy/empty',
   );
 
   return $element;

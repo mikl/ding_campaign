@@ -36,7 +36,7 @@ function ding_campaign_admin_rule_page($node) {
   }
   drupal_add_js(drupal_get_path('module', 'ding_campaign') . '/js/ding_campaign.rules.js');
   drupal_add_js(array('dingCampaignRules' => array(
-    'autocompleteUrl' => url('campaign_rules/autocomplete/'),
+    'autocompleteUrl' => url('ding_campaign/autocomplete/'),
   )), 'setting');
 
   return drupal_get_form('ding_campaign_admin_rule_form', $node);
@@ -194,29 +194,40 @@ function ding_campaign_admin_rule_form_ahah($form_state, $node) {
 function ding_campaign_admin_autocomplete($type, $term) {
   $matches = array();
 
-  if ($type == 'page') {
-    $query = db_query("SELECT nid, title FROM node WHERE title LIKE('%%%s%%') LIMIT 5;", $term);
-    while ($row = db_fetch_array($query)) {
-      $value = _ding_campaign_strip_title($row['title']) . ' [nid:' . $row['nid'] . ']';
-      $matches[$value] = $value;
+  if (!empty($term)) {
+    switch ($type) {
+      case 'page':
+        $query = db_query("SELECT nid, title FROM node WHERE title LIKE('%%%s%%') LIMIT 5;", $term);
+        while ($row = db_fetch_array($query)) {
+          $value = _ding_campaign_strip_title($row['title']) . ' [nid:' . $row['nid'] . ']';
+          $matches[$value] = $value;
+        }
+        break;
+      case 'library':
+        $query = db_query("SELECT nid, title FROM node WHERE type = 'library' AND title LIKE('%%%s%%') LIMIT 5;", $term);
+        while ($row = db_fetch_array($query)) {
+          $value = _ding_campaign_strip_title($row['title']) . ' [nid:' . $row['nid'] . ']';
+          $matches[$value] = $value;
+        }
+        break;
+      case 'taxonomy':
+        $query = db_query("SELECT tid, name FROM term_data WHERE name LIKE('%%%s%%') LIMIT 5;", $term);
+        while ($row = db_fetch_array($query)) {
+          $value = _ding_campaign_strip_title($row['name']) . ' [tid:' . $row['tid'] . ']';
+          $matches[$value] = $value;
+        }
+        break;
+      case 'campaign':
+        $query = db_query("SELECT nid, title FROM node WHERE type = 'campaign' AND title LIKE('%%%s%%') LIMIT 5;", $term);
+        while ($row = db_fetch_array($query)) {
+          $value = _ding_campaign_strip_title($row['title']) . ' [nid:' . $row['nid'] . ']';
+          $matches[$value] = $value;
+        }
+        break;
     }
   }
-  elseif ($type == 'library') {
-    $query = db_query("SELECT nid, title FROM node WHERE type = 'library' AND title LIKE('%%%s%%') LIMIT 5;", $term);
-    while ($row = db_fetch_array($query)) {
-      $value = _ding_campaign_strip_title($row['title']) . ' [nid:' . $row['nid'] . ']';
-      $matches[$value] = $value;
-    }
-  }
-  elseif ($type == 'taxonomy') {
-    $query = db_query("SELECT tid, name FROM term_data WHERE name LIKE('%%%s%%') LIMIT 5;", $term);
-    while ($row = db_fetch_array($query)) {
-      $value = _ding_campaign_strip_title($row['name']) . ' [tid:' . $row['tid'] . ']';
-      $matches[$value] = $value;
-    }
-  }
+
   drupal_json($matches);
-  exit();
 }
 
 /**
