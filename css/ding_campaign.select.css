@@ -1,3 +1,5 @@
+/* $Id$ */
+
 /** Use some CSS3 to have a nice multicolumn select for campaigns. **/
 div.ding-campaign-select {
   -moz-column-width: 13em;

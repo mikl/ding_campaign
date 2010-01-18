@@ -161,11 +161,11 @@ function ding_campaign_form(&$node) {
     '#type' => 'radios',
     '#title' => t('Campaign theme'),
     '#options' => array(
-      'red' => t('Red'),
-      'blue' => t('Blue'),
-      'green' => t('Green'),
+      'theme-a' => t('Campaign theme A'),
+      'theme-b' => t('Campaign theme B'),
+      'theme-c' => t('Campaign theme C'),
     ),
-    '#default_value' => (isset($node->campaign_theme)) ? $node->campaign_theme : 'red',
+    '#default_value' => (isset($node->campaign_theme)) ? $node->campaign_theme : 'theme-a',
   );
 
   $form['campaign_settings']['campaign_weight'] = array(
@@ -195,7 +195,7 @@ function ding_campaign_insert($node) {
  */
 function ding_campaign_update($node) {
   // Check if theres an existing row in {ding_campaign}
-  $prev_vid = db_result(db_query("SELECT vid FROM {ding_campaign} WHERE nid=%d", $node->nid));
+  $prev_vid = db_result(db_query("SELECT vid FROM {ding_campaign} WHERE nid=%d;", $node->nid));
   // If this is a new node or we're adding a new revision,
   if ($node->revision || !$prev_vid) {
     ding_campaign_insert($node);
@@ -253,7 +253,7 @@ function ding_campaign_nodeapi(&$node, $op, $teaser, $page) {
       break;
     case 'delete revision':
       // Notice that we're matching a single revision based on the node's vid.
-      db_query('DELETE FROM {ding_campaign} WHERE vid = %d', $node->vid);
+      db_query('DELETE FROM {ding_campaign} WHERE vid = %d;', $node->vid);
       break;
   }
 }
@@ -265,8 +265,8 @@ function ding_campaign_nodeapi(&$node, $op, $teaser, $page) {
  */
 function ding_campaign_delete($node) {
   // Notice that we're matching all revision, by using the node's nid.
-  db_query('DELETE FROM {ding_campaign} WHERE nid = %d', $node->nid);
-  db_query('DELETE FROM {ding_campaign_rule} WHERE nid = %d', $node->nid);
+  db_query('DELETE FROM {ding_campaign} WHERE nid = %d;', $node->nid);
+  db_query('DELETE FROM {ding_campaign_rule} WHERE nid = %d;', $node->nid);
 }
 
 /**
@@ -277,7 +277,7 @@ function ding_campaign_delete($node) {
  * every time a node is loaded, and allows us to do some loading of our own.
  */
 function ding_campaign_load($node) {
-  $additions = db_fetch_object(db_query('SELECT * FROM {ding_campaign} WHERE vid = %d', $node->vid));
+  $additions = db_fetch_object(db_query('SELECT * FROM {ding_campaign} WHERE vid = %d;', $node->vid));
   unset($additions->vid);
   unset($additions->nid);
 
