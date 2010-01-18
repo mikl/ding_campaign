@@ -231,6 +231,10 @@ function ding_campaign_nodeapi(&$node, $op, $teaser, $page) {
         db_query("DELETE FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $node->nid);
       }
     case 'insert':
+      if (!isset($node->ding_campaigns) || !is_array($node->ding_campaigns)) {
+        return;
+      }
+
       $campaigns = array_filter($node->ding_campaigns);
 
       if (!empty($campaigns) && in_array($node->type, variable_get('ding_campaign_selector_node_types', array())) && user_access('associate other content to campaign')) {
