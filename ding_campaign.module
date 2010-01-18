@@ -160,13 +160,16 @@ function ding_campaign_form(&$node) {
   $form['campaign_settings']['campaign_theme'] = array(
     '#type' => 'radios',
     '#title' => t('Campaign theme'),
-    '#options' => array(
-      'theme-a' => t('Campaign theme A'),
-      'theme-b' => t('Campaign theme B'),
-      'theme-c' => t('Campaign theme C'),
-    ),
-    '#default_value' => (isset($node->campaign_theme)) ? $node->campaign_theme : 'theme-a',
+    '#options' => variable_get('ding_campaign_theme_choices', ding_campaign_default_theme_choices()),
+    '#default_value' => (isset($node->campaign_theme)) ? $node->campaign_theme : '',
   );
+
+  // Make sure we have a valid default value. Select the first option,
+  // if the default value is not a valid option.
+  if (!empty($form['campaign_settings']['campaign_theme']['#options']) && !isset($form['campaign_settings']['campaign_theme']['#options'][$form['campaign_settings']['campaign_theme']['#default_value']])) {
+    $keys = array_keys($form['campaign_settings']['campaign_theme']['#options']);
+    $form['campaign_settings']['campaign_theme']['#default_value'] = $keys[0];
+  }
 
   $form['campaign_settings']['campaign_weight'] = array(
     '#type' => 'weight',
@@ -586,5 +589,16 @@ function ding_campaign_load_option_list() {
   }
 
   return $options;
+}
+
+/**
+ * Provide an array of default campaign theme choices.
+ */
+function ding_campaign_default_theme_choices() {
+  return array(
+    'red' => t('Red'),
+    'blue' => t('Blue'),
+    'green' => t('Green'),
+  );
 }
 

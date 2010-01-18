@@ -17,11 +17,46 @@ function ding_campaign_admin_settings_form(&$form_state) {
     '#options' => node_get_types('names'),
     '#default_value' => variable_get('ding_campaign_selector_node_types', array()),
   );
-
   // Don't allow campaigns to be assigned to other campaigns.
   unset($form['ding_campaign_selector_node_types']['#options']['campaign']);
 
+
+  // Process the default value for our theme choices.
+  $choices = variable_get('ding_campaign_theme_choices', ding_campaign_default_theme_choices());
+  $text_choices = '';
+  foreach ($choices as $class => $name) {
+    $text_choices .= $class . '|' . $name . "\n";
+  }
+
+  $form['ding_campaign_theme_choices'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Campaign themes'),
+    '#description' => t('Provide a list of themes available when creating or editing campaigns. Provide a list of pipe-delimited in the form of "css-class|Long descriptive name", like "forest|Forest green with trees", one on each line.'),
+    '#required' => TRUE,
+    '#default_value' => $text_choices,
+  );
+
   return system_settings_form($form);
+}
+
+/**
+ * Validation for our systems settings form.
+ */
+function ding_campaign_admin_settings_form_validate($form, &$form_state) {
+  $choices = array();
+
+  foreach (preg_split('/\n/', $form_state['values']['ding_campaign_theme_choices']) as $line) {
+    if (strpos($line, '|')) {
+      list($class, $name) = explode('|', $line);
+      $choices[$class] = $name;
+    }
+  }
+
+  if (empty($choices)) {
+    form_set_error('ding_campaign_theme_choices', t('Please define one or more theme choices.'));
+  }
+
+  $form_state['values']['ding_campaign_theme_choices'] = $choices;
 }
 
 /**
