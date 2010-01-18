@@ -43,6 +43,10 @@ function ding_campaign_admin_settings_form(&$form_state) {
  * Validation for our systems settings form.
  */
 function ding_campaign_admin_settings_form_validate($form, &$form_state) {
+  // Filter out the empty values from the node types and get the type
+  // names of the enabled types, and store these as the value.
+  $form_state['values']['ding_campaign_selector_node_types'] = array_keys(array_filter($form_state['values']['ding_campaign_selector_node_types']));
+
   $choices = array();
 
   foreach (preg_split('/\n/', $form_state['values']['ding_campaign_theme_choices']) as $line) {
