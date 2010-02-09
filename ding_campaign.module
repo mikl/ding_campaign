@@ -429,6 +429,7 @@ function ding_campaign_rule_element_process($element, $form_state) {
     '#title' => t('Type'),
     '#options' => array(
       'page' => t('Specific page'),
+      'system_path' => t('System path'),
       'search_term' => t('Search term'),
       'taxonomy' => t('Taxonomy term'),
       'generic' => t('Generic'),
@@ -484,6 +485,16 @@ function ding_campaign_get_relevant($context, $max_count = DING_CAMPAIGN_DEFAULT
       $campaigns[$camp_nid] += 9;
     }
   }
+
+  // Get all system-path campaign rules.
+  $query = db_query("SELECT * FROM {ding_campaign_rule} WHERE type = 'system_path';");
+  while ($row = db_fetch_array($query)) {
+    // Check if the rule matches the current path.
+    if (drupal_match_path($_GET['q'], $row['value'])) {
+      $campaigns[$row['nid']] += 8;
+    }
+  }
+
   if (isset($context['search_term']) && !empty($context['search_term'])) {
     // If there's more than one search term, make a SQL IN condition by
     // splitting them and joining them with commas.
@@ -501,6 +512,7 @@ function ding_campaign_get_relevant($context, $max_count = DING_CAMPAIGN_DEFAULT
       $campaigns[$camp_nid] += 7;
     }
   }
+
   if (isset($context['library']) && !empty($context['library'])) {
     if ($context['library'] instanceof stdClass) {
       $nid = $context['library']->nid;
@@ -513,6 +525,7 @@ function ding_campaign_get_relevant($context, $max_count = DING_CAMPAIGN_DEFAULT
       $campaigns[$camp_nid] += 5;
     }
   }
+
   if (isset($context['taxonomy']) && !empty($context['taxonomy'])) {
     if ($context['taxonomy'] instanceof stdClass) {
       $tid = $context['taxonomy']->tid;
