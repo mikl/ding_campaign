@@ -108,3 +108,17 @@ function ding_campaign_schema() {
   return $schema;
 }
 
+/**
+ * Implementation of hook_update_N().
+ *
+ * Rename system_path to path to reflect that they now work for both
+ * system paths and path aliases.
+ */
+function ding_campaign_update_6001(&$sandbox) {
+  $ret = array();
+
+  $ret[] = update_sql("UPDATE ding_campaign_rule SET `type` = 'path' WHERE `type` = 'system_path';");
+
+  return $ret;
+}
+

@@ -429,7 +429,7 @@ function ding_campaign_rule_element_process($element, $form_state) {
     '#title' => t('Type'),
     '#options' => array(
       'page' => t('Specific page'),
-      'system_path' => t('System path'),
+      'path' => t('Path'),
       'search_term' => t('Search term'),
       'taxonomy' => t('Taxonomy term'),
       'generic' => t('Generic'),
@@ -486,11 +486,17 @@ function ding_campaign_get_relevant($context, $max_count = DING_CAMPAIGN_DEFAULT
     }
   }
 
-  // Get all system-path campaign rules.
-  $query = db_query("SELECT * FROM {ding_campaign_rule} WHERE type = 'system_path';");
+  // Get all path-based campaign rules.
+  $query = db_query("SELECT * FROM {ding_campaign_rule} WHERE type = 'path';");
   while ($row = db_fetch_array($query)) {
-    // Check if the rule matches the current path.
-    if (drupal_match_path($_GET['q'], $row['value'])) {
+    $path = drupal_get_path_alias($_GET['q']);
+    // Compare with the internal and path alias (if any).
+    $page_match = drupal_match_path($path, $row['value']);
+    if ($path != $_GET['q']) {
+      $page_match = $page_match || drupal_match_path($_GET['q'], $row['value']);
+    }
+
+    if ($page_match) {
       $campaigns[$row['nid']] += 8;
     }
   }
