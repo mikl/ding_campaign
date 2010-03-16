@@ -117,7 +117,24 @@ function ding_campaign_schema() {
 function ding_campaign_update_6001(&$sandbox) {
   $ret = array();
 
-  $ret[] = update_sql("UPDATE ding_campaign_rule SET `type` = 'path' WHERE `type` = 'system_path';");
+  $ret[] = update_sql("UPDATE {ding_campaign_rule} SET `type` = 'path' WHERE `type` = 'system_path';");
+
+  return $ret;
+}
+
+/**
+ * Implementation of hook_update_N().
+ *
+ * Remove campaign rules on non-campaign nodes.
+ */
+function ding_campaign_update_6002(&$sandbox) {
+  $ret = array();
+
+  $ret[] = update_sql("
+    DELETE dcr FROM {ding_campaign_rule} AS dcr
+    LEFT JOIN {node} AS n USING(nid)
+    WHERE n.type != 'campaign';
+  ");
 
   return $ret;
 }
