@@ -35,6 +35,7 @@ function ding_campaign_relevant_content_type_render($subtype, $conf, $panel_args
     'library' => isset($context[1]->data) ? drupal_clone($context[1]->data) : NULL,
     'search_term' => isset($context[2]->data) ? check_plain($context[2]->data) : NULL,
   );
+  $count = ($conf['campaign_count']) ? $conf['campaign_count'] : DING_CAMPAIGN_DEFAULT_COUNT;
   $block = new stdClass();
   $block->content = theme('ding_campaign_relevant_campaigns', $campaign_context, $conf['campaign_count']);
   return $block;
@@ -49,9 +50,6 @@ function ding_campaign_relevant_content_type_admin_title($subtype, $conf, $conte
 
 /**
  * Returns an edit form for the content type.
- *
- * We're not actually doing anything here, but we need to have this hook 
- * for this content type to work.
  */
 function ding_campaign_relevant_content_type_edit_form(&$form, &$form_state) {
   $form['campaign_count'] = array(
