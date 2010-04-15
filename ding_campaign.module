@@ -210,6 +210,12 @@ function ding_campaign_update($node) {
   else {
     drupal_write_record('ding_campaign', $node, array('nid', 'vid'));
   }
+
+  // Clear the cached version of the rendered campaign.
+  // It is not useful to re-render it here, since the theme the campaign
+  // is displayed in can be different from the one active when this hook
+  // is invoked, especially when an admin theme is enabled.
+  cache_clear_all('node_view:' . $node->nid, 'cache_ding_campaign');
 }
 
 /**
@@ -593,9 +599,22 @@ function theme_ding_campaign_relevant_campaigns($context, $max_count = DING_CAMP
 
   foreach ($campaigns as $nid) {
     if ($nid > 0) {
-      $node = node_load($nid);
-      if ($node && $node->status) {
-        $output .= node_view($node, TRUE, FALSE, FALSE);
+      $cache_key = 'node_view:' . $nid;
+
+      // Return data from cache if available.
+      $cache = ($reset) ? FALSE : cache_get($cache_key, 'cache_ding_campaign');
+      if ($cache && !empty($cache->data)) {
+        $output .= $cache->data;
+      }
+      else {
+        $node = node_load($nid);
+        if ($node && $node->status) {
+          $rendered_node = node_view($node, TRUE, FALSE, FALSE);
+          $output .= $rendered_node;
+
+          // Cache the rendered output.
+          cache_set($cache_key, $rendered_node, 'cache_ding_campaign');
+        }
       }
     }
   }
