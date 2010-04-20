@@ -106,8 +106,6 @@ function ding_campaign_schema() {
     ), 
   );
 
-  $schema['cache_ding_campaign_rendered'] = drupal_get_schema_unprocessed('system', 'cache');
-
   return $schema;
 }
 
@@ -152,6 +150,19 @@ function ding_campaign_update_6003(&$sandbox) {
 
   db_create_table($ret, 'cache_ding_campaign',
                   drupal_get_schema_unprocessed('system', 'cache'));
+  return $ret;
+}
+
+/**
+ * Implementation of hook_update_N().
+ *
+ * Create cache table for Ding campaigns.
+ */
+function ding_campaign_update_6004(&$sandbox) {
+  $ret = array();
+
+  db_drop_table($ret, 'cache_ding_campaign');
+
   return $ret;
 }
 
