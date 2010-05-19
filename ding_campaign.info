@@ -1,6 +1,18 @@
-; $Id$
-name = Ding! campaign
-description = Campaign system. Displays context-sensitive, ad-like campaigns.
-package = Ding!
-core = 6.x
+name = "Ding! campaign"
+package = "Ding!"
+project = "ding_campaign"
+description = "Campaign system. Displays context-sensitive, ad-like campaigns."
+core = "6.x"
+dependencies[] = "features"
+dependencies[] = "imagefield"
+dependencies[] = "link"
+dependencies[] = "strongarm"
+features[content][] = "campaign-field_campaign_image"
+features[content][] = "campaign-field_campaign_link"
+features[ctools][] = "variable"
+features[variable][] = "comment_anonymous_campaign"
+features[variable][] = "comment_campaign"
+features[variable][] = "comment_default_mode_campaign"
+features[variable][] = "content_extra_weights_campaign"
+features[variable][] = "node_options_campaign"
 

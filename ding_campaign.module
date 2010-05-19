@@ -634,3 +634,5 @@ function ding_campaign_default_theme_choices() {
   );
 }
 
+require_once('ding_campaign.features.inc');
+
