@@ -1,28 +1,31 @@
 <?php
 
 /**
- * Implementation of hook_content_default_fields().
- */
-function ding_campaign_content_default_fields() {
-  module_load_include('inc', 'ding_campaign', 'ding_campaign.defaults');
-  $args = func_get_args();
-  return call_user_func_array('_ding_campaign_content_default_fields', $args);
-}
-
-/**
  * Implementation of hook_ctools_plugin_api().
  */
 function ding_campaign_ctools_plugin_api() {
-  module_load_include('inc', 'ding_campaign', 'ding_campaign.defaults');
-  $args = func_get_args();
-  return call_user_func_array('_ding_campaign_ctools_plugin_api', $args);
+  list($module, $api) = func_get_args();
+  if ($module == "strongarm" && $api == "strongarm") {
+    return array("version" => 1);
+  }
 }
 
 /**
- * Implementation of hook_strongarm().
+ * Implementation of hook_node_info().
  */
-function ding_campaign_strongarm() {
-  module_load_include('inc', 'ding_campaign', 'ding_campaign.defaults');
-  $args = func_get_args();
-  return call_user_func_array('_ding_campaign_strongarm', $args);
+function ding_campaign_node_info() {
+  $items = array(
+    'campaign' => array(
+      'name' => t('Campaign'),
+      'module' => 'features',
+      'description' => t('A campaign, a small image or text snippet displayed on the page like an ad.'),
+      'has_title' => '1',
+      'title_label' => t('Name'),
+      'has_body' => '1',
+      'body_label' => t('Campaign text'),
+      'min_word_count' => '0',
+      'help' => '',
+    ),
+  );
+  return $items;
 }

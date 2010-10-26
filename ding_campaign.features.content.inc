@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Helper to implementation of hook_content_default_fields().
+ * Implementation of hook_content_default_fields().
  */
-function _ding_campaign_content_default_fields() {
+function ding_campaign_content_default_fields() {
   $fields = array();
 
   // Exported field: field_campaign_image
-  $fields[] = array(
+  $fields['campaign-field_campaign_image'] = array(
     'field_name' => 'field_campaign_image',
     'type_name' => 'campaign',
     'display_settings' => array(
@@ -65,6 +65,11 @@ function _ding_campaign_content_default_fields() {
       'title_type' => 'textfield',
       'default_image' => NULL,
       'use_default_image' => 0,
+      'insert' => NULL,
+      'insert_styles' => NULL,
+      'insert_default' => NULL,
+      'insert_class' => NULL,
+      'insert_width' => NULL,
       'label' => 'Kampagnebillede',
       'weight' => '-2',
       'description' => 'Upload det billede som skal bruges til billedkampagnen.',
@@ -74,7 +79,7 @@ function _ding_campaign_content_default_fields() {
   );
 
   // Exported field: field_campaign_link
-  $fields[] = array(
+  $fields['campaign-field_campaign_link'] = array(
     'field_name' => 'field_campaign_link',
     'type_name' => 'campaign',
     'display_settings' => array(
@@ -126,6 +131,7 @@ function _ding_campaign_content_default_fields() {
     'title' => 'none',
     'title_value' => '',
     'enable_tokens' => 0,
+    'validate_url' => '',
     'widget' => array(
       'default_value' => array(
         '0' => array(
@@ -142,71 +148,9 @@ function _ding_campaign_content_default_fields() {
   );
 
   // Translatables
-  array(
-    t('Kampagnebillede'),
-    t('Kampagnedestination'),
-  );
+  // Included for use with string extractors like potx.
+  t('Kampagnebillede');
+  t('Kampagnedestination');
 
   return $fields;
-}
-
-/**
- * Helper to implementation of hook_ctools_plugin_api().
- */
-function _ding_campaign_ctools_plugin_api() {
-  $args = func_get_args();
-  $module = array_shift($args);
-  $api = array_shift($args);
-  if ($module == "strongarm" && $api == "strongarm") {
-    return array("version" => 1);
-  }
-}
-
-/**
- * Helper to implementation of hook_strongarm().
- */
-function _ding_campaign_strongarm() {
-  $export = array();
-  $strongarm = new stdClass;
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'comment_anonymous_campaign';
-  $strongarm->value = 0;
-
-  $export['comment_anonymous_campaign'] = $strongarm;
-  $strongarm = new stdClass;
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'comment_campaign';
-  $strongarm->value = '0';
-
-  $export['comment_campaign'] = $strongarm;
-  $strongarm = new stdClass;
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'comment_default_mode_campaign';
-  $strongarm->value = '4';
-
-  $export['comment_default_mode_campaign'] = $strongarm;
-  $strongarm = new stdClass;
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'content_extra_weights_campaign';
-  $strongarm->value = array(
-    'title' => '-5',
-    'body_field' => '-3',
-    'menu' => '-4',
-  );
-
-  $export['content_extra_weights_campaign'] = $strongarm;
-  $strongarm = new stdClass;
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'node_options_campaign';
-  $strongarm->value = array(
-    '0' => 'status',
-  );
-
-  $export['node_options_campaign'] = $strongarm;
-  return $export;
 }

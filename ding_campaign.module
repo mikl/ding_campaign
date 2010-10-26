@@ -74,21 +74,6 @@ function ding_campaign_perm() {
 }
 
 /**
- * Implementation of hook_node_info().
- */
-function ding_campaign_node_info() {
-  return array(
-    'campaign' => array(
-      'name' => t('Campaign'),
-      'module' => 'ding_campaign',
-      'description' => 'A campaign, a small image or text snippet displayed on the page like an ad.',
-      'title_label' => t('Name'),
-      'body_label' => t('Campaign text'),
-    ),
-  );
-}
-
-/**
  * Implementation of hook_access().
  */
 function ding_campaign_access($op, $node, $account = NULL) {
@@ -112,7 +97,7 @@ function ding_campaign_access($op, $node, $account = NULL) {
  * Provides the node editing form.
  */
 function ding_campaign_form(&$node) {
-  // We have a bit of JavaScript to help with the interface for this 
+  // We have a bit of JavaScript to help with the interface for this
   // module's editing interface.
   drupal_add_js(drupal_get_path('module', 'ding_campaign') . '/js/ding_campaign.edit.js');
 
@@ -139,7 +124,7 @@ function ding_campaign_form(&$node) {
     // properly.
     $form['body_field'] = node_body_field($node, $type->body_label, $type->min_word_count);
   }
-  // For this node type, we don't want splittable teasers, so let's 
+  // For this node type, we don't want splittable teasers, so let's
   // disable that.
   unset($form['body_field']['teaser_js']);
   unset($form['body_field']['teaser_include']);
@@ -334,7 +319,7 @@ function ding_campaign_elements() {
 
 /**
  * Implementation of hook_theme().
- * 
+ *
  * This lets us tell Drupal about our theme functions and their arguments.
  */
 function ding_campaign_theme() {
@@ -571,7 +556,7 @@ function ding_campaign_get_relevant($context, $max_count = -1) {
 /**
  * Theme function to format the our custom form element.
  *
- * We use the container-inline class so that all three of the HTML elements 
+ * We use the container-inline class so that all three of the HTML elements
  * are placed next to each other, rather than on separate lines.
  */
 function theme_ding_campaign_rule($element) {
