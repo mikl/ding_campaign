@@ -19,8 +19,8 @@ function ding_campaign_menu() {
     'title' => 'Display rules',
     'page callback' => 'ding_campaign_admin_rule_page',
     'page arguments' => array(1),
-    'access callback' => 'ding_campaign_access',
-    'access arguments' => array('update', 1),
+    'access callback' => 'node_content_access',
+    'access arguments' => array('update', 1, NULL),
     'file' => 'ding_campaign.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'options' => array('admin' => TRUE),
@@ -31,8 +31,8 @@ function ding_campaign_menu() {
     'title' => 'Display rules',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('ding_campaign_admin_rule_form_ahah', 1),
-    'access callback' => 'ding_campaign_access',
-    'access arguments' => array('update', 1),
+    'access callback' => 'node_content_access',
+    'access arguments' => array('update', 1, NULL),
     'file' => 'ding_campaign.admin.inc',
     'type' => MENU_CALLBACK,
   );
@@ -41,7 +41,8 @@ function ding_campaign_menu() {
     'title' => 'Campaign rules autocomplete callback',
     'page callback' => 'ding_campaign_admin_autocomplete',
     'page arguments' => array(2),
-    'access arguments' => array('edit campaign'),
+    'access callback' => 'node_content_access',
+    'access arguments' => array('update', 1, NULL),
     'file' => 'ding_campaign.admin.inc',
     'type' => MENU_CALLBACK,
   );
@@ -66,29 +67,8 @@ function ding_campaign_menu() {
  */
 function ding_campaign_perm() {
   return array(
-    'create campaign',
-    'edit campaign',
-    'delete campaign',
     'associate other content to campaign',
   );
-}
-
-/**
- * Implementation of hook_access().
- */
-function ding_campaign_access($op, $node, $account = NULL) {
-  if ($node instanceOf stdClass && $node->type != 'campaign') {
-    return FALSE;
-  }
-
-  switch ($op) {
-    case 'create':
-      return user_access('create campaign', $account);
-    case 'update':
-      return user_access('edit campaign', $account);
-    case 'delete':
-      return user_access('delete campaign', $account);
-  }
 }
 
 /**
