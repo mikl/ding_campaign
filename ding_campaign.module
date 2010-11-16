@@ -72,112 +72,6 @@ function ding_campaign_perm() {
 }
 
 /**
- * Implementation of hook_form().
- *
- * Provides the node editing form.
- */
-function ding_campaign_form(&$node) {
-  // We have a bit of JavaScript to help with the interface for this
-  // module's editing interface.
-  drupal_add_js(drupal_get_path('module', 'ding_campaign') . '/js/ding_campaign.edit.js');
-
-  // The site admin can decide if this node type has a title and body, and how
-  // the fields should be labeled. We need to load these settings so we can
-  // build the node form correctly.
-  $type = node_get_types('type', $node);
-  $form = array();
-
-  if ($type->has_title) {
-    $form['title'] = array(
-      '#type' => 'textfield',
-      '#title' => check_plain($type->title_label),
-      '#required' => TRUE,
-      '#default_value' => $node->title,
-      '#weight' => -5
-    );
-  }
-
-  if ($type->has_body) {
-    // In Drupal 6, we can use node_body_field() to get the body and filter
-    // elements. This replaces the old textarea + filter_form() method of
-    // setting this up. It will also ensure the teaser splitter gets set up
-    // properly.
-    $form['body_field'] = node_body_field($node, $type->body_label, $type->min_word_count);
-  }
-  // For this node type, we don't want splittable teasers, so let's
-  // disable that.
-  unset($form['body_field']['teaser_js']);
-  unset($form['body_field']['teaser_include']);
-
-  $form['campaign_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Campaign settings'),
-    '#weight' => -3,
-  );
-
-  $form['campaign_settings']['campaign_type'] = array(
-    '#type' => 'radios',
-    '#title' => t('Campaign type'),
-    '#options' => array(
-      'text-only' => t('Text only'),
-      'image-only' => t('Image only'),
-    ),
-    '#attributes' => array('class' => 'campaign-type-select'),
-    '#default_value' => (isset($node->campaign_type)) ? $node->campaign_type : 'text-only',
-  );
-
-  $form['campaign_settings']['campaign_theme'] = array(
-    '#type' => 'radios',
-    '#title' => t('Campaign theme'),
-    '#options' => variable_get('ding_campaign_theme_choices', ding_campaign_default_theme_choices()),
-    '#default_value' => (isset($node->campaign_theme)) ? $node->campaign_theme : '',
-  );
-
-  // Make sure we have a valid default value. Select the first option,
-  // if the default value is not a valid option.
-  if (!empty($form['campaign_settings']['campaign_theme']['#options']) && !isset($form['campaign_settings']['campaign_theme']['#options'][$form['campaign_settings']['campaign_theme']['#default_value']])) {
-    $keys = array_keys($form['campaign_settings']['campaign_theme']['#options']);
-    $form['campaign_settings']['campaign_theme']['#default_value'] = $keys[0];
-  }
-
-  $form['campaign_settings']['campaign_weight'] = array(
-    '#type' => 'weight',
-    '#title' => t('Weight'),
-    '#default_value' => (isset($node->campaign_weight)) ? $node->campaign_weight : 0,
-  );
-
-  return $form;
-}
-
-/**
- * Implementation of hook_insert().
- *
- * As a new node is being inserted into the database, we need to do our own
- * database inserts.
- */
-function ding_campaign_insert($node) {
-  drupal_write_record('ding_campaign', $node);
-}
-
-/**
- * Implementation of hook_update().
- *
- * As an existing node is being updated in the database, we need to do our own
- * database updates.
- */
-function ding_campaign_update($node) {
-  // Check if theres an existing row in {ding_campaign}
-  $prev_vid = db_result(db_query("SELECT vid FROM {ding_campaign} WHERE nid=%d;", $node->nid));
-  // If this is a new node or we're adding a new revision,
-  if ($node->revision || !$prev_vid) {
-    ding_campaign_insert($node);
-  }
-  else {
-    drupal_write_record('ding_campaign', $node, array('nid', 'vid'));
-  }
-}
-
-/**
  * Implementation of hook_nodeapi().
  *
  * When a node revision is deleted, we need to remove the corresponding record
@@ -187,95 +81,89 @@ function ding_campaign_update($node) {
 function ding_campaign_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'load':
-      // Get the current campaign association for the node.
-      if (in_array($node->type, variable_get('ding_campaign_selector_node_types', array()))) {
-        $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $node->nid);
+      if ($node->type == 'campaign') {
+        $additions = db_fetch_array(db_query('SELECT * FROM {ding_campaign} WHERE vid = %d;', $node->vid));
+        unset($additions['vid']);
+        unset($additions['nid']);
 
-        $node->ding_campaigns = array();
-        while ($campaign_nid = db_result($query)) {
-          $node->ding_campaigns[$campaign_nid] = $campaign_nid;
+        // Also fetch associated rules.
+        $additions['campaign_rules'] = array();
+        $rules_query = db_query("SELECT * FROM {ding_campaign_rule} WHERE nid = %d;", $node->nid);
+        while ($rule = db_fetch_array($rules_query)) {
+          $additions['campaign_rules'][$rule['delta']] = $rule;
+        }
+        return $additions;
+      }
+      else {
+        // Get the current campaign association for the node.
+        if (in_array($node->type, variable_get('ding_campaign_selector_node_types', array()))) {
+          $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $node->nid);
+
+          $node->ding_campaigns = array();
+          while ($campaign_nid = db_result($query)) {
+            $node->ding_campaigns[$campaign_nid] = $campaign_nid;
+          }
         }
       }
       break;
     case 'update':
-      // When updating a node, purge the current campaign selections first.
-      if (in_array($node->type, variable_get('ding_campaign_selector_node_types', array())) && user_access('associate other content to campaign')) {
-        db_query("DELETE FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $node->nid);
+      if ($node->type == 'campaign') {
+        // Check if theres an existing row in {ding_campaign}
+        $prev_vid = db_result(db_query("SELECT vid FROM {ding_campaign} WHERE nid=%d;", $node->nid));
+        // If this is a new node or we're adding a new revision,
+        if ($node->revision || !$prev_vid) {
+          drupal_write_record('ding_campaign', $node);
+        }
+        else {
+          drupal_write_record('ding_campaign', $node, array('nid', 'vid'));
+        }
+      }
+      else {
+        // When updating a node, purge the current campaign selections first.
+        if (in_array($node->type, variable_get('ding_campaign_selector_node_types', array())) && user_access('associate other content to campaign')) {
+          db_query("DELETE FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $node->nid);
+        }
       }
     case 'insert':
-      if (!isset($node->ding_campaigns) || !is_array($node->ding_campaigns)) {
-        return;
+      if ($node->type == 'campaign') {
+        drupal_write_record('ding_campaign', $node);
       }
-
-      $campaigns = array_filter($node->ding_campaigns);
-
-      if (!empty($campaigns) && in_array($node->type, variable_get('ding_campaign_selector_node_types', array())) && user_access('associate other content to campaign')) {
-        $cols = array();
-        $params = array();
-        $now = $_SERVER['REQUEST_TIME'];
-
-        foreach ($campaigns as $campaign_nid) {
-          // We use $now as delta to be reasonably sure not to have
-          // delta collisions within the same nid, since nid+delta is
-          // the primary key for ding_campaign_rule.
-          $cols[] = "(%d, $now, 'page', '%s', %d)";
-          $params[] = $campaign_nid;
-          $params[] = $node->title . ' [nid:' . $node->nid . ']';
-          $params[] = $node->nid;
+      else {
+        if (!isset($node->ding_campaigns) || !is_array($node->ding_campaigns)) {
+          return;
         }
 
-        db_query('INSERT INTO {ding_campaign_rule} (nid, delta, type, value, value_id) VALUES ' . implode(',', $cols), $params);
+        $campaigns = array_filter($node->ding_campaigns);
+
+        if (!empty($campaigns) && in_array($node->type, variable_get('ding_campaign_selector_node_types', array())) && user_access('associate other content to campaign')) {
+          $cols = array();
+          $params = array();
+          $now = $_SERVER['REQUEST_TIME'];
+
+          foreach ($campaigns as $campaign_nid) {
+            // We use $now as delta to be reasonably sure not to have
+            // delta collisions within the same nid, since nid+delta is
+            // the primary key for ding_campaign_rule.
+            $cols[] = "(%d, $now, 'page', '%s', %d)";
+            $params[] = $campaign_nid;
+            $params[] = $node->title . ' [nid:' . $node->nid . ']';
+            $params[] = $node->nid;
+          }
+
+          db_query('INSERT INTO {ding_campaign_rule} (nid, delta, type, value, value_id) VALUES ' . implode(',', $cols), $params);
+        }
       }
+      break;
+    case 'delete':
+      // Notice that we're matching all revision, by using the node's nid.
+      db_query('DELETE FROM {ding_campaign} WHERE nid = %d;', $node->nid);
+      db_query('DELETE FROM {ding_campaign_rule} WHERE nid = %d;', $node->nid);
       break;
     case 'delete revision':
       // Notice that we're matching a single revision based on the node's vid.
       db_query('DELETE FROM {ding_campaign} WHERE vid = %d;', $node->vid);
       break;
   }
-}
-
-/**
- * Implementation of hook_delete().
- *
- * When a node is deleted, we need to remove all related records from our table.
- */
-function ding_campaign_delete($node) {
-  // Notice that we're matching all revision, by using the node's nid.
-  db_query('DELETE FROM {ding_campaign} WHERE nid = %d;', $node->nid);
-  db_query('DELETE FROM {ding_campaign_rule} WHERE nid = %d;', $node->nid);
-}
-
-/**
- * Implementation of hook_load().
- *
- * Now that we've defined how to manage the node data in the database, we
- * need to tell Drupal how to get the node back out. This hook is called
- * every time a node is loaded, and allows us to do some loading of our own.
- */
-function ding_campaign_load($node) {
-  $additions = db_fetch_object(db_query('SELECT * FROM {ding_campaign} WHERE vid = %d;', $node->vid));
-  unset($additions->vid);
-  unset($additions->nid);
-
-  // Also fetch associated rules.
-  $additions->campaign_rules = array();
-  $rules_query = db_query("SELECT * FROM {ding_campaign_rule} WHERE nid = %d;", $node->nid);
-  while ($rule = db_fetch_array($rules_query)) {
-    $additions->campaign_rules[$rule['delta']] = $rule;
-  }
-
-  return $additions;
-}
-
-/**
- * Implementation of hook_view().
- *
- * This is a typical implementation that simply runs the node text through
- * the output filters.
- */
-function ding_campaign_view($node, $teaser = FALSE, $page = FALSE) {
-  $node = node_prepare($node, $teaser);
-  return $node;
 }
 
 /**
@@ -317,24 +205,74 @@ function ding_campaign_theme() {
  * Implementation of hook_form_alter().
  */
 function ding_campaign_form_alter(&$form, $form_state, $form_id) {
-  // For node types that have the campaign selector enabled.
-  if ($form['#id'] == 'node-form' && in_array($form['#node']->type, variable_get('ding_campaign_selector_node_types', array())) && user_access('associate other content to campaign')) {
-    $form['ding_campaign_select'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Campaigns'),
-      '#description' => t('Select the campaigns that should be displayed when this node is displayed as a page.'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
+  if ($form['#id'] == 'node-form') {
+    if ($form['#node']->type == 'campaign') {
+      // We have a bit of JavaScript to help with the interface for this
+      // module's editing interface.
+      drupal_add_js(drupal_get_path('module', 'ding_campaign') . '/js/ding_campaign.edit.js');
+      // For this node type, we don't want splittable teasers, so let's
+      // disable that.
+      unset($form['body_field']['teaser_js']);
+      unset($form['body_field']['teaser_include']);
 
-    $form['ding_campaign_select']['ding_campaigns'] = array(
-      '#type' => 'checkboxes',
-      '#options' => ding_campaign_load_option_list(),
-      '#attributes' => array('class' => 'ding-campaign-select'),
-      '#default_value' => (isset($form['#node']->ding_campaigns)) ? $form['#node']->ding_campaigns : array(),
-    );
+      $form['campaign_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Campaign settings'),
+        '#weight' => -3,
+      );
 
-    drupal_add_css(drupal_get_path('module', 'ding_campaign') . '/css/ding_campaign.select.css');
+      $form['campaign_settings']['campaign_type'] = array(
+        '#type' => 'radios',
+        '#title' => t('Campaign type'),
+        '#options' => array(
+          'text-only' => t('Text only'),
+          'image-only' => t('Image only'),
+        ),
+        '#attributes' => array('class' => 'campaign-type-select'),
+        '#default_value' => (isset($node->campaign_type)) ? $node->campaign_type : 'text-only',
+      );
+
+      $form['campaign_settings']['campaign_theme'] = array(
+        '#type' => 'radios',
+        '#title' => t('Campaign theme'),
+        '#options' => variable_get('ding_campaign_theme_choices', ding_campaign_default_theme_choices()),
+        '#default_value' => (isset($node->campaign_theme)) ? $node->campaign_theme : '',
+      );
+
+      // Make sure we have a valid default value. Select the first option,
+      // if the default value is not a valid option.
+      if (!empty($form['campaign_settings']['campaign_theme']['#options']) && !isset($form['campaign_settings']['campaign_theme']['#options'][$form['campaign_settings']['campaign_theme']['#default_value']])) {
+        $keys = array_keys($form['campaign_settings']['campaign_theme']['#options']);
+        $form['campaign_settings']['campaign_theme']['#default_value'] = $keys[0];
+      }
+
+      $form['campaign_settings']['campaign_weight'] = array(
+        '#type' => 'weight',
+        '#title' => t('Weight'),
+        '#default_value' => (isset($node->campaign_weight)) ? $node->campaign_weight : 0,
+      );
+    }
+
+
+    if (in_array($form['#node']->type, variable_get('ding_campaign_selector_node_types', array())) && user_access('associate other content to campaign')) {
+      // For node types that have the campaign selector enabled.
+      $form['ding_campaign_select'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Campaigns'),
+        '#description' => t('Select the campaigns that should be displayed when this node is displayed as a page.'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+
+      $form['ding_campaign_select']['ding_campaigns'] = array(
+        '#type' => 'checkboxes',
+        '#options' => ding_campaign_load_option_list(),
+        '#attributes' => array('class' => 'ding-campaign-select'),
+        '#default_value' => (isset($form['#node']->ding_campaigns)) ? $form['#node']->ding_campaigns : array(),
+      );
+
+      drupal_add_css(drupal_get_path('module', 'ding_campaign') . '/css/ding_campaign.select.css');
+    }
   }
 }
 

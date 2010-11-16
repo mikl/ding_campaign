@@ -181,14 +181,14 @@ function ding_campaign_admin_rule_form_submit($form, &$form_state) {
   foreach (array_values($form_state['values']['rules']) as $delta => $rule) {
     $rule['delta'] = $delta;
     drupal_write_record('ding_campaign_rule', $rule);
-  } 
+  }
 }
 
 /*
   This function is largely based on the poll module, its been simplified for reuse.
   $fields is the specific form elements you want to attach via ahah,
   $name is the form fields array key... e.g. the name for $form['title'] is "title"
-*/ 
+*/
 function ding_campaign_admin_rule_form_ahah($form_state, $node) {
   // Use the admin module's theme if available.
   if (function_exists('_admin_init_theme')) {
@@ -201,7 +201,7 @@ function ding_campaign_admin_rule_form_ahah($form_state, $node) {
   // process it. We retreive the cached form, add the element, and resave.
   $form = form_get_cache($form_build_id, $form_state);
 
-  // Delta is assigned to the count of current elements, so it'll be the 
+  // Delta is assigned to the count of current elements, so it'll be the
   // next in the zero-based list.
   $delta = count(element_children($form['rules']));
 
