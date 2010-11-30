@@ -130,6 +130,7 @@ function ding_campaign_nodeapi(&$node, $op, $teaser, $page) {
           db_query("DELETE FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $node->nid);
         }
       }
+      break;
     case 'insert':
       if ($node->type == 'campaign') {
         drupal_write_record('ding_campaign', $node);
