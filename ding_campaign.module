@@ -212,7 +212,8 @@ function ding_campaign_theme() {
  */
 function ding_campaign_form_alter(&$form, $form_state, $form_id) {
   if ($form['#id'] == 'node-form') {
-    if ($form['#node']->type == 'campaign') {
+    if ($form['type']['#value'] == 'campaign') {
+      $node = $form['#node'];
       // We have a bit of JavaScript to help with the interface for this
       // module's editing interface.
       drupal_add_js(drupal_get_path('module', 'ding_campaign') . '/js/ding_campaign.edit.js');
