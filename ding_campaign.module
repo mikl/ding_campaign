@@ -19,8 +19,8 @@ function ding_campaign_menu() {
     'title' => 'Display rules',
     'page callback' => 'ding_campaign_admin_rule_page',
     'page arguments' => array(1),
-    'access callback' => 'node_content_access',
-    'access arguments' => array('update', 1, NULL),
+    'access callback' => 'ding_campaign_access',
+    'access arguments' => array(1),
     'file' => 'ding_campaign.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'options' => array('admin' => TRUE),
@@ -31,8 +31,8 @@ function ding_campaign_menu() {
     'title' => 'Display rules',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('ding_campaign_admin_rule_form_ahah', 1),
-    'access callback' => 'node_content_access',
-    'access arguments' => array('update', 1, NULL),
+    'access callback' => 'ding_campaign_access',
+    'access arguments' => array(1),
     'file' => 'ding_campaign.admin.inc',
     'type' => MENU_CALLBACK,
   );
@@ -42,7 +42,7 @@ function ding_campaign_menu() {
     'page callback' => 'ding_campaign_admin_autocomplete',
     'page arguments' => array(2),
     'access callback' => 'node_content_access',
-    'access arguments' => array('update', 1, NULL),
+    'access arguments' => array('create', 'campaign', NULL),
     'file' => 'ding_campaign.admin.inc',
     'type' => MENU_CALLBACK,
   );
@@ -59,11 +59,17 @@ function ding_campaign_menu() {
 }
 
 /**
+ * Menu access callback.
+ */
+function ding_campaign_access($node) {
+  if ($node->type == 'campaign') {
+    return node_content_access('update', $node, NULL);
+  }
+  return FALSE;
+}
+
+/**
  * Implementation of hook_perm().
- *
- * Since we are limiting the ability to create new nodes to certain users,
- * we need to define what those permissions are here. We also define a permission
- * to allow users to edit the nodes they created.
  */
 function ding_campaign_perm() {
   return array(
