@@ -14,7 +14,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2010-10-28 13:15+0200\n"
+"POT-Creation-Date: 2011-01-19 14:30+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -59,7 +59,7 @@ msgstr ""
 msgid "Related library"
 msgstr ""
 
-#: plugins/content_types/relevant.inc:24 ding_campaign.module:402
+#: plugins/content_types/relevant.inc:24 ding_campaign.module:348
 msgid "Search term"
 msgstr ""
 
@@ -75,87 +75,87 @@ msgstr ""
 msgid "Campaign count must be a number larger than zero."
 msgstr ""
 
-#: ding_campaign.module:114
+#: ding_campaign.module:228
 msgid "Campaign settings"
 msgstr ""
 
-#: ding_campaign.module:120
+#: ding_campaign.module:234
 msgid "Campaign type"
 msgstr ""
 
-#: ding_campaign.module:122
+#: ding_campaign.module:236
 msgid "Text only"
 msgstr ""
 
-#: ding_campaign.module:123
+#: ding_campaign.module:237
 msgid "Image only"
 msgstr ""
 
-#: ding_campaign.module:131
+#: ding_campaign.module:245
 msgid "Campaign theme"
 msgstr ""
 
-#: ding_campaign.module:145
+#: ding_campaign.module:259
 msgid "Weight"
 msgstr ""
 
-#: ding_campaign.module:324
+#: ding_campaign.module:269
 msgid "Campaigns"
 msgstr ""
 
-#: ding_campaign.module:325
+#: ding_campaign.module:270
 msgid "Select the campaigns that should be displayed when this node is displayed as a page."
 msgstr ""
 
-#: ding_campaign.module:358
+#: ding_campaign.module:304
 msgid "Campaign rules"
 msgstr ""
 
-#: ding_campaign.module:359
+#: ding_campaign.module:305
 msgid "Use the administration theme when campaign display rules."
 msgstr ""
 
-#: ding_campaign.module:398
+#: ding_campaign.module:344
 msgid "Type"
 msgstr ""
 
-#: ding_campaign.module:400
+#: ding_campaign.module:346
 msgid "Specific page"
 msgstr ""
 
-#: ding_campaign.module:401
+#: ding_campaign.module:347
 msgid "Path"
 msgstr ""
 
-#: ding_campaign.module:403
+#: ding_campaign.module:349
 msgid "Taxonomy term"
 msgstr ""
 
-#: ding_campaign.module:404
+#: ding_campaign.module:350
 msgid "Generic"
 msgstr ""
 
-#: ding_campaign.module:411
+#: ding_campaign.module:357
 msgid "Library"
 msgstr ""
 
-#: ding_campaign.module:416
+#: ding_campaign.module:362
 msgid "Value"
 msgstr ""
 
-#: ding_campaign.module:596
+#: ding_campaign.module:542
 msgid "Red"
 msgstr ""
 
-#: ding_campaign.module:597
+#: ding_campaign.module:543
 msgid "Blue"
 msgstr ""
 
-#: ding_campaign.module:598
+#: ding_campaign.module:544
 msgid "Green"
 msgstr ""
 
-#: ding_campaign.module:70
+#: ding_campaign.module:76
 msgid "associate other content to campaign"
 msgstr ""
 
