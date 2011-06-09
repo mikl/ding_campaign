@@ -1,6 +1,4 @@
 <?php
-// $Id$
-
 /**
  * @file ding_campaign.module
  * Provides the campaign node type for the Ding! project.

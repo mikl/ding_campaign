@@ -1,4 +1,3 @@
-// $Id$
 
 Drupal.behaviors.dingCampaignRules = function () {
   $('#campaign-rules')
