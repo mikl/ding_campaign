@@ -21,6 +21,18 @@ Drupal.behaviors.dingCampaignEdit = function () {
               .find('#edit-field-campaign-image-0-ahah-wrapper').show('fast').end()
             .end();
           }
+
+          // This is a Luckow-style hack to work around the problem that
+          // the link field is required. The field is hidden and set to
+          // a bogus value when WYSIWYG-mode is active.
+          if ($(this).val() == 'wysiwyg-title') {
+            $('#node-form')
+              .find('#edit-field-campaign-link-0-url').val('undefined').parent().hide('fast');
+          }
+          else {
+            $('#node-form')
+              .find('#edit-field-campaign-link-0-url').val('').parent().show('fast');
+          }
         })
       .end()
     // Now that we have a click handler, trigger it on the already
