@@ -11,32 +11,32 @@ function ding_campaign_content_default_fields() {
     'field_name' => 'field_campaign_image',
     'type_name' => 'campaign',
     'display_settings' => array(
-      'weight' => '-2',
+      'weight' => '-1',
       'parent' => '',
+      'token' => array(
+        'format' => 'ding_campaign_default',
+        'exclude' => 0,
+      ),
+      '2' => array(
+        'format' => 'ding_campaign_default',
+        'exclude' => 0,
+      ),
+      '3' => array(
+        'format' => 'ding_campaign_default',
+        'exclude' => 0,
+      ),
       'label' => array(
         'format' => 'hidden',
       ),
       'teaser' => array(
-        'format' => 'image_plain',
+        'format' => 'ding_campaign_default',
         'exclude' => 0,
       ),
       'full' => array(
-        'format' => 'image_plain',
+        'format' => 'ding_campaign_default',
         'exclude' => 0,
       ),
       '4' => array(
-        'format' => 'image_plain',
-        'exclude' => 0,
-      ),
-      '2' => array(
-        'format' => 'image_plain',
-        'exclude' => 0,
-      ),
-      '3' => array(
-        'format' => 'image_plain',
-        'exclude' => 0,
-      ),
-      'token' => array(
         'format' => 'image_plain',
         'exclude' => 0,
       ),
@@ -56,8 +56,8 @@ function ding_campaign_content_default_fields() {
       'progress_indicator' => 'bar',
       'max_filesize_per_file' => '',
       'max_filesize_per_node' => '',
-      'max_resolution' => 0,
-      'min_resolution' => 0,
+      'max_resolution' => '0',
+      'min_resolution' => '0',
       'alt' => '',
       'custom_alt' => 0,
       'title' => '',
@@ -65,13 +65,23 @@ function ding_campaign_content_default_fields() {
       'title_type' => 'textfield',
       'default_image' => NULL,
       'use_default_image' => 0,
-      'insert' => NULL,
-      'insert_styles' => NULL,
-      'insert_default' => NULL,
-      'insert_class' => NULL,
-      'insert_width' => NULL,
+      'insert' => 1,
+      'insert_styles' => array(
+        'imagecache_ding_campaign' => 'imagecache_ding_campaign',
+        'auto' => 0,
+        'link' => 0,
+        'image' => 0,
+        'imagecache_80_x' => 0,
+        'imagecache_120_120' => 0,
+        'imagecache_180_x' => 0,
+        'imagecache_680_200_crop' => 0,
+        'imagecache_ting_search_carousel' => 0,
+      ),
+      'insert_default' => 'imagecache_ding_campaign',
+      'insert_class' => 'ding-campaign-image',
+      'insert_width' => '',
       'label' => 'Kampagnebillede',
-      'weight' => '-2',
+      'weight' => '-1',
       'description' => 'Upload det billede som skal bruges til billedkampagnen.',
       'type' => 'imagefield_widget',
       'module' => 'imagefield',
@@ -83,8 +93,20 @@ function ding_campaign_content_default_fields() {
     'field_name' => 'field_campaign_link',
     'type_name' => 'campaign',
     'display_settings' => array(
-      'weight' => '-1',
+      'weight' => 0,
       'parent' => '',
+      'token' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '2' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '3' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
       'label' => array(
         'format' => 'hidden',
       ),
@@ -97,18 +119,6 @@ function ding_campaign_content_default_fields() {
         'exclude' => 0,
       ),
       '4' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '2' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '3' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      'token' => array(
         'format' => 'default',
         'exclude' => 0,
       ),
@@ -140,7 +150,7 @@ function ding_campaign_content_default_fields() {
       ),
       'default_value_php' => NULL,
       'label' => 'Kampagnedestination',
-      'weight' => '-1',
+      'weight' => 0,
       'description' => 'Kampagnedestinationen skal være en URL (internetadresse) til det sted brugeren sendes hen, når han klikker på kampagnen.',
       'type' => 'link',
       'module' => 'link',

@@ -11,6 +11,30 @@ function ding_campaign_ctools_plugin_api() {
 }
 
 /**
+ * Implementation of hook_imagecache_default_presets().
+ */
+function ding_campaign_imagecache_default_presets() {
+  $items = array(
+    'ding_campaign' => array(
+      'presetname' => 'ding_campaign',
+      'actions' => array(
+        '0' => array(
+          'weight' => '0',
+          'module' => 'imagecache',
+          'action' => 'imagecache_scale',
+          'data' => array(
+            'width' => '210',
+            'height' => '500',
+            'upscale' => 0,
+          ),
+        ),
+      ),
+    ),
+  );
+  return $items;
+}
+
+/**
  * Implementation of hook_node_info().
  */
 function ding_campaign_node_info() {

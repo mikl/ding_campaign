@@ -32,8 +32,15 @@ function ding_campaign_strongarm() {
   $strongarm->name = 'content_extra_weights_campaign';
   $strongarm->value = array(
     'title' => '-5',
-    'body_field' => '-3',
+    'body_field' => '-2',
+    'revision_information' => '2',
+    'author' => '3',
+    'options' => '4',
+    'comment_settings' => '6',
     'menu' => '-4',
+    'taxonomy' => '-3',
+    'path' => '7',
+    'path_redirect' => '5',
   );
 
   $export['content_extra_weights_campaign'] = $strongarm;

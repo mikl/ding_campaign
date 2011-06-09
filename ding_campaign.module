@@ -233,6 +233,7 @@ function ding_campaign_form_alter(&$form, $form_state, $form_id) {
         '#options' => array(
           'text-only' => t('Text only'),
           'image-only' => t('Image only'),
+          'wysiwyg-title' => t('WYSIWYG with title'),
         ),
         '#attributes' => array('class' => 'campaign-type-select'),
         '#default_value' => (isset($node->campaign_type)) ? $node->campaign_type : 'text-only',

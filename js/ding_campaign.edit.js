@@ -15,6 +15,12 @@ Drupal.behaviors.dingCampaignEdit = function () {
               .find('#edit-field-campaign-image-0-ahah-wrapper').show('fast').end()
             .end();
           }
+          else {
+            $('#node-form')
+              .find('.body-field-wrapper').show('fast').end()
+              .find('#edit-field-campaign-image-0-ahah-wrapper').show('fast').end()
+            .end();
+          }
         })
       .end()
     // Now that we have a click handler, trigger it on the already
