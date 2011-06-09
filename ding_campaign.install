@@ -1,6 +1,4 @@
 <?php 
-// $Id$
-
 /**
  * @file ding_campaign.install
  * Installation and upgrade hooks for the ding_campaign module.

@@ -1,4 +1,3 @@
-// $Id$
 
 Drupal.behaviors.dingCampaignEdit = function () {
   $('#node-form')
