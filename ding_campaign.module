@@ -203,7 +203,7 @@ function ding_campaign_theme() {
       'arguments' => array('element' => NULL),
     ),
     'ding_campaign_relevant_campaigns' => array(
-      'context' => array('context' => NULL, 'max_count' => NULL),
+      'context' => array('context' => NULL, 'max_count' => NULL, 'offset' => NULL),
     ),
   );
 }
@@ -383,10 +383,12 @@ function ding_campaign_rule_element_validate($element, &$form_state) {
  *    Array of context items – search_term, library, page and taxonomy.
  * @param integer $max_count
  *    The maximum number of campaigns to return.
+ * @param integer $offset
+ *    The index of the campaign from which to count when returning campaigns.
  * @return array
  *    Array of node ids of relevant campaigns, sorted by relevancy.
  */
-function ding_campaign_get_relevant($context, $max_count = -1) {
+function ding_campaign_get_relevant($context, $max_count = -1, $offset = 0) {
   // Make sure we have a positive number before we proceed.
   $max_count = (integer) $max_count;
   if ($max_count < 1) {
@@ -476,7 +478,7 @@ function ding_campaign_get_relevant($context, $max_count = -1) {
   }
 
   arsort($campaigns);
-  return array_slice(array_keys($campaigns), 0, $max_count);
+  return array_slice(array_keys($campaigns), $offset, $max_count);
 }
 
 /**
@@ -496,12 +498,14 @@ function theme_ding_campaign_rule($element) {
  *    The context array passed to ding_campaign_get_relevant()
  * @param integer $max_count
  *    The maximum number of campaigns to return.
+ * @param integer $offset
+ *    The index of the campaign from which to count when returning campaigns.
  * @return string
  *    Rendered campaign nodes, or FALSE if no match was found.
  * @see ding_campaign_get_relevant().
  */
-function theme_ding_campaign_relevant_campaigns($context, $max_count = DING_CAMPAIGN_DEFAULT_COUNT) {
-  $campaigns = ding_campaign_get_relevant($context, $max_count);
+function theme_ding_campaign_relevant_campaigns($context, $max_count = DING_CAMPAIGN_DEFAULT_COUNT, $offset = 0) {
+  $campaigns = ding_campaign_get_relevant($context, $max_count, $offset);
   $output = '';
 
   foreach ($campaigns as $nid) {
