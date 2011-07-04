@@ -563,7 +563,7 @@ function ding_campaign_campaign_types() {
   	'page' => array('title' => t('Specific page'),
                     'description' => t('Adds relevance to the campaign if shown with a specific node.')),
     'path' => array('title' => t('Path'),
-                    'description' => t('Adds relevance to the campaign if the current path or path alias matches. Use * as wildcard e.g. blog/* to match all blog paths.')),
+                    'description' => t('Adds relevance to the campaign if the current path or path alias matches. Do not include the leading /. Use * as wildcard. Example: blog/* matches all blog posts.')),
     'search_term' => array('title' => t('Search term'),
                            'description' =>  t('Adds relevance to the campaign on search result pages for the selected term.')),
     'taxonomy' => array('title' => t('Taxonomy term'),
