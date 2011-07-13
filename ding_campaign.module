@@ -401,14 +401,14 @@ function ding_campaign_get_relevant($context, $max_count = -1) {
     else {
       $nid = (int) $context['page'];
     }
-    $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $nid);
+    $query = db_query("SELECT d.nid FROM {ding_campaign_rule} d JOIN {node} n USING (nid) WHERE n.status = 1 AND d.type = 'page' AND d.value_id = %d", $nid);
     while ($camp_nid = db_result($query)) {
       $campaigns[$camp_nid] += 9;
     }
   }
 
   // Get all path-based campaign rules.
-  $query = db_query("SELECT * FROM {ding_campaign_rule} WHERE type = 'path';");
+  $query = db_query("SELECT d.* FROM {ding_campaign_rule} d JOIN {node} n USING (nid) WHERE n.status = 1 AND d.type = 'path'");
   while ($row = db_fetch_array($query)) {
     $path = drupal_get_path_alias($_GET['q']);
     // Compare with the internal and path alias (if any).
@@ -434,7 +434,7 @@ function ding_campaign_get_relevant($context, $max_count = -1) {
       $condition = "= '" . $keys . "'";
     }
 
-    $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'search_term' AND value " . $condition);
+    $query = db_query("SELECT d.nid FROM {ding_campaign_rule} d JOIN {node} n USING (nid) WHERE n.status = 1 AND d.type = 'search_term' AND d.value " . $condition);
     while ($camp_nid = db_result($query)) {
       $campaigns[$camp_nid] += 7;
     }
@@ -447,7 +447,7 @@ function ding_campaign_get_relevant($context, $max_count = -1) {
     else {
       $nid = (int) $context['library'];
     }
-    $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'library' AND value_id = %d;", $nid);
+    $query = db_query("SELECT d.nid FROM {ding_campaign_rule} d JOIN {node} n USING (nid) WHERE n.status = 1 AND d.type = 'library' AND d.value_id = %d;", $nid);
     while ($camp_nid = db_result($query)) {
       $campaigns[$camp_nid] += 5;
     }
@@ -460,7 +460,7 @@ function ding_campaign_get_relevant($context, $max_count = -1) {
     else {
       $tid = (int) $context['taxonomy'];
     }
-    $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'taxonomy' AND value_id = %d;", $tid);
+    $query = db_query("SELECT d.nid FROM {ding_campaign_rule} d JOIN {node} n USING (nid) WHERE n.status = 1 AND d.type = 'taxonomy' AND d.value_id = %d;", $tid);
     while ($camp_nid = db_result($query)) {
       $campaigns[$camp_nid] += 3;
     }
@@ -468,7 +468,7 @@ function ding_campaign_get_relevant($context, $max_count = -1) {
 
   // Give a small (and random) amount of relevancy to generic campaigns
   // that have not scored in any of the other categories.
-  $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'generic'");
+  $query = db_query("SELECT d.nid FROM {ding_campaign_rule} d JOIN {node} n USING (nid) WHERE n.status = 1 AND d.type = 'generic'");
   while ($camp_nid = db_result($query)) {
     if (!isset($campaigns[$camp_nid]) || $campaigns[$camp_nid] == 0) {
       $campaigns[$camp_nid] += (mt_rand(1, 10) / 10);
