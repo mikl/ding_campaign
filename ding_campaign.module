@@ -473,7 +473,7 @@ function ding_campaign_get_relevant($context, $max_count = -1, $offset = 0) {
   $query = db_query("SELECT d.nid FROM {ding_campaign_rule} d JOIN {node} n USING (nid) WHERE n.status = 1 AND d.type = 'generic'");
   while ($camp_nid = db_result($query)) {
     if (!isset($campaigns[$camp_nid]) || $campaigns[$camp_nid] == 0) {
-      $campaigns[$camp_nid] += (mt_rand(1, 10) / 10);
+      $campaigns[$camp_nid] = (mt_rand(1, 10) / 10);
     }
   }
 
