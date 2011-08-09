@@ -7,7 +7,7 @@
 /**
  * Callback function to supply a list of content types.
  *
- * This is only required to make CTools know that we're providing 
+ * This is only required to make CTools know that we're providing
  * multiple types here (since we have no single => TRUE in the array).
  */
 function ding_campaign_relevant_ctools_content_types() {
@@ -34,8 +34,10 @@ function ding_campaign_relevant_content_type_render($subtype, $conf, $panel_args
     'library' => isset($context[1]->data) ? drupal_clone($context[1]->data) : NULL,
     'search_term' => isset($context[2]->data) ? check_plain($context[2]->data) : NULL,
   );
-  $count = ($conf['campaign_count']) ? $conf['campaign_count'] : DING_CAMPAIGN_DEFAULT_COUNT;
-  $offset = ($conf['campaign_offset']) ? $conf['campaign_offset'] : 0;
+
+  $count = (!empty($conf['campaign_count'])) ? $conf['campaign_count'] : DING_CAMPAIGN_DEFAULT_COUNT;
+  $offset = (!empty($conf['campaign_offset'])) ? $conf['campaign_offset'] : 0;
+
   $block = new stdClass();
   $block->content = theme('ding_campaign_relevant_campaigns', $campaign_context, $count, $offset);
   return $block;
