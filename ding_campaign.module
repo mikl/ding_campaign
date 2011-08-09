@@ -471,7 +471,7 @@ function ding_campaign_get_relevant($context, $max_count = -1) {
   $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'generic'");
   while ($camp_nid = db_result($query)) {
     if (!isset($campaigns[$camp_nid]) || $campaigns[$camp_nid] == 0) {
-      $campaigns[$camp_nid] += (mt_rand(1, 10) / 10);
+      $campaigns[$camp_nid] = (mt_rand(1, 10) / 10);
     }
   }
 
