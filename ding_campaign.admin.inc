@@ -94,7 +94,7 @@ function ding_campaign_admin_rule_form($form_state, $node) {
   $form['rules'] = array(
     '#type' => 'fieldset',
     '#title' => t('Rules'),
-    '#description' => t('The more rules that match on a page, the higher rank the campaign will have. The "generic" rule will give a small bit of rank on all pages, so that the campaign will show up if there is not enough relevant campaigns.'),
+    '#description' => t('The more rules that match on a page, the higher rank the campaign will have.'),
     '#attributes' => array('id' => 'campaign-rules'),
     '#tree' => TRUE,
   );

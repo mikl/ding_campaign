@@ -337,16 +337,15 @@ function ding_campaign_rule_element_process($element, $form_state) {
     '#value' => (isset($element['#delta'])) ? $element['#delta'] : $element['#value']['delta'],
   );
 
+  // Generate a list of options based on the available campagin types
+  $options = ding_campaign_campaign_types();
+  foreach($options as $id => $type) {
+    $options[$id] = $type['title'];
+  }
   $element['type'] = array(
     '#type' => 'select',
     '#title' => t('Type'),
-    '#options' => array(
-      'page' => t('Specific page'),
-      'path' => t('Path'),
-      'search_term' => t('Search term'),
-      'taxonomy' => t('Taxonomy term'),
-      'generic' => t('Generic'),
-    ),
+    '#options' => $options,
     '#default_value' => $element['#value']['type'],
   );
 
@@ -362,6 +361,17 @@ function ding_campaign_rule_element_process($element, $form_state) {
     // Set up autocomplete pointing to a dummy path that just returns an
     // empty array. We set the correct path via JavaScript.
     '#autocomplete_path' => 'ding_campaign/autocomplete/dummy/empty',
+    '#size' => 60,
+  );
+  
+  // Generate som help based on the available campagin types
+  $help = '';
+  foreach (ding_campaign_campaign_types() as $id => $type) {
+    $help .= '<dt class="' . $id . '">' . t($type['title']) . '</dt><dd class="' . $id . '">' . t($type['description']) . '</dd>';
+  }
+  $element['help'] = array(
+    '#type' => 'markup',
+  	'#value' => '<dl>'.$help.'</dl>',
   );
 
   return $element;
@@ -545,6 +555,25 @@ function ding_campaign_default_theme_choices() {
     'blue' => t('Blue'),
     'green' => t('Green'),
   );
+}
+
+/**
+ * Returns an array of campaign types.
+ */
+function ding_campaign_campaign_types() {
+  $types = array(
+  	'page' => array('title' => t('Specific page'),
+                    'description' => t('Adds relevance to the campaign if shown with a specific node.')),
+    'path' => array('title' => t('Path'),
+                    'description' => t('Adds relevance to the campaign if the current path or path alias matches. Do not include the leading /. Use * as wildcard. Example: blog/* matches all blog posts.')),
+    'search_term' => array('title' => t('Search term'),
+                           'description' =>  t('Adds relevance to the campaign on search result pages for the selected term.')),
+    'taxonomy' => array('title' => t('Taxonomy term'),
+                        'description' => t('Adds relevance to the campaign if shown with a node containing the selected term.')),
+    'generic' => array('title' => t('Generic'),
+    									 'description' => t('Gives a small bit of rank on all pages, so that the campaign will show up if there is not enough relevant campaigns.')),
+  );
+  return $types;
 }
 
 require_once('ding_campaign.features.inc');
