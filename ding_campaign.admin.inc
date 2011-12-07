@@ -179,6 +179,8 @@ function ding_campaign_admin_rule_form_submit($form, &$form_state) {
   // delta, and use the new key to overwrite the delta setting on the rule.
   foreach (array_values($form_state['values']['rules']) as $delta => $rule) {
     $rule['delta'] = $delta;
+    $rule['status'] = 1;
+
     drupal_write_record('ding_campaign_rule', $rule);
   }
 }
