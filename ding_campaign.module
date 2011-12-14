@@ -416,14 +416,14 @@ function ding_campaign_get_relevant($context, $max_count = -1, $offset = 0) {
     else {
       $nid = (int) $context['page'];
     }
-    $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'page' AND value_id = %d;", $nid);
+    $query = db_query("SELECT nid FROM {ding_campaign_rule} WHERE type = 'page' AND status = 1 AND value_id = %d;", $nid);
     while ($camp_nid = db_result($query)) {
       $campaigns[$camp_nid] += 9;
     }
   }
 
   // Get all path-based campaign rules.
-  $query = db_query("SELECT * FROM {ding_campaign_rule} WHERE type = 'path';");
+  $query = db_query("SELECT * FROM {ding_campaign_rule} WHERE type = 'path' AND status = 1;");
   while ($row = db_fetch_array($query)) {
     $path = drupal_get_path_alias($_GET['q']);
     // Compare with the internal and path alias (if any).
